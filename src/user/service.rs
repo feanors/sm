@@ -5,7 +5,7 @@ use diesel_async::{
 use thiserror::Error;
 
 use super::{
-    model::{CreateUserDTO, User},
+    model::{CreateUserDTO, User, UserDTO},
     repo,
 };
 
@@ -26,16 +26,16 @@ impl UserService {
         UserService { db_pool }
     }
 
-    pub async fn create_user(&self, u: CreateUserDTO) -> Result<User, UserServiceError> {
+    pub async fn create_user(&self, u: CreateUserDTO) -> Result<UserDTO, UserServiceError> {
         let mut conn = self.db_pool.get().await?;
         let user = User::from_userdto(u);
         repo::create_user(&mut conn, &user).await?;
-        Ok(user)
+        Ok(user.to_userdto())
     }
 
-    pub async fn get_user(&self, user_id: &str) -> Result<User, UserServiceError> {
+    pub async fn get_user(&self, user_id: uuid::Uuid) -> Result<UserDTO, UserServiceError> {
         let mut conn = self.db_pool.get().await?;
         let user = repo::get_user(&mut conn, user_id).await?;
-        Ok(user)
+        Ok(user.to_userdto())
     }
 }

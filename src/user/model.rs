@@ -5,7 +5,7 @@ use crate::utils;
 
 #[derive(Serialize)]
 pub struct UserDTO {
-    pub id: String,
+    pub id: uuid::Uuid,
     pub username: String,
     pub description: String,
     pub created_at: DateTime<Utc>,
@@ -19,7 +19,7 @@ pub struct CreateUserDTO {
 
 #[derive(Debug)]
 pub struct User {
-    pub id: String,
+    pub id: uuid::Uuid,
     pub username: String,
     pub description: String,
     pub created_at: DateTime<Utc>,
@@ -37,7 +37,7 @@ impl User {
 
     pub fn from_userdto(u: CreateUserDTO) -> User {
         User {
-            id: utils::new_uuid(),
+            id: uuid::Uuid::new_v4(),
             username: u.username,
             description: u.description,
             created_at: utils::time_now(),
