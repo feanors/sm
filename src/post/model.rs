@@ -30,7 +30,7 @@ pub struct CreatePostDTO {
     pub content: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Post {
     pub id: uuid::Uuid,
     pub posted_by: uuid::Uuid,
@@ -38,22 +38,24 @@ pub struct Post {
     pub created_at: DateTime<Utc>,
 }
 
-impl Post {
-    pub fn to_postdto(self) -> PostDTO {
-        PostDTO {
-            id: self.id,
-            posted_by: self.posted_by,
-            content: self.content,
-            created_at: self.created_at,
-        }
-    }
-
-    pub fn from_postdto(p: CreatePostDTO) -> Post {
+impl From<CreatePostDTO> for Post {
+    fn from(p: CreatePostDTO) -> Self {
         Post {
             id: uuid::Uuid::new_v4(),
             posted_by: p.posted_by,
             content: p.content,
             created_at: utils::time_now(),
+        }
+    }
+}
+
+impl Into<PostDTO> for Post {
+    fn into(self) -> PostDTO {
+        PostDTO {
+            id: self.id,
+            posted_by: self.posted_by,
+            content: self.content,
+            created_at: self.created_at,
         }
     }
 }

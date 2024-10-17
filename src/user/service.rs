@@ -28,14 +28,14 @@ impl UserService {
 
     pub async fn create_user(&self, u: CreateUserDTO) -> Result<UserDTO, UserServiceError> {
         let mut conn = self.db_pool.get().await?;
-        let user = User::from_userdto(u);
-        repo::create_user(&mut conn, &user).await?;
-        Ok(user.to_userdto())
+        let user: User = u.into();
+        repo::create_user(&mut conn, user.clone()).await?;
+        Ok(user.into())
     }
 
     pub async fn get_user(&self, user_id: uuid::Uuid) -> Result<UserDTO, UserServiceError> {
         let mut conn = self.db_pool.get().await?;
         let user = repo::get_user(&mut conn, user_id).await?;
-        Ok(user.to_userdto())
+        Ok(user.into())
     }
 }

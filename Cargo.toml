@@ -4,14 +4,30 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+async-nats = { version = "0.37.0", features = ["experimental", "service"] }
 axum = { version = "0.7.7", features = ["macros"] }
+bytes = { version = "1.7.2", features = ["serde"] }
 chrono = { version = "0.4.38", features = ["serde"] }
+dashmap = "6.1.0"
 diesel = { version = "2.2.4", features = ["chrono", "uuid"] }
 diesel-async = { version = "0.5.0", features = ["deadpool", "postgres"] }
 dotenvy = "0.15.7"
+futures = "0.3.31"
 rand = "0.8.5"
 serde = { version = "1.0.210", features = ["derive"] }
+serde_bytes = "0.11.15"
 serde_json = "1.0.128"
 thiserror = "1.0.64"
 tokio = { version = "1.40.0", features = ["full"] }
 uuid = { version = "1.10.0", features = ["serde", "v4"] }
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "analytics_server"
+path = "src/bin/analytics_server.rs"
+
+[[bin]]
+name = "main"
+path = "src/bin/main.rs"

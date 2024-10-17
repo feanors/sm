@@ -31,9 +31,9 @@ impl PostService {
 
     pub async fn create_post(&self, p: CreatePostDTO) -> Result<PostDTO, PostServiceError> {
         let mut conn = self.db_pool.get().await?;
-        let post: Post = Post::from_postdto(p);
-        repo::create_post(&mut conn, &post).await?;
-        Ok(post.to_postdto())
+        let post: Post = p.into();
+        repo::create_post(&mut conn, post.clone()).await?;
+        Ok(post.into())
     }
 
     pub async fn get_posts(&self, user_id: uuid::Uuid) -> Result<PostsDTO, PostServiceError> {
@@ -45,8 +45,8 @@ impl PostService {
         )?;
 
         Ok(PostsDTO::new(
-            res.0.to_userdto(),
-            res.1.into_iter().map(|p| p.to_postdto()).collect(),
+            res.0.into(),
+            res.1.into_iter().map(|p| p.into()).collect(),
         ))
     }
 }

@@ -39,6 +39,6 @@ impl FriendshipService {
 
         let r = repo::get_friends(&mut conn, user_id).await?;
 
-        Ok(r.into_iter().map(|u| u.to_userdto()).collect())
+        Ok(r.into_iter().map(|u| u.into()).collect())
     }
 }

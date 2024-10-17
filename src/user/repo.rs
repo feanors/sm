@@ -17,17 +17,19 @@ pub struct User {
     pub created_at: chrono::DateTime<Utc>,
 }
 
-impl User {
-    pub fn from_domain_model(u: &super::model::User) -> User {
+impl From<super::model::User> for User {
+    fn from(u: super::model::User) -> Self {
         User {
-            id: u.id.clone(),
-            username: u.username.clone(),
-            description: u.description.clone(),
-            created_at: u.created_at.clone(),
+            id: u.id,
+            username: u.username,
+            description: u.description,
+            created_at: u.created_at,
         }
     }
+}
 
-    pub fn to_domain_model(self) -> super::model::User {
+impl Into<super::model::User> for User {
+    fn into(self) -> super::model::User {
         super::model::User {
             id: self.id,
             username: self.username,
@@ -39,9 +41,9 @@ impl User {
 
 pub async fn create_user(
     conn: &mut AsyncPgConnection,
-    u: &super::model::User,
+    u: super::model::User,
 ) -> Result<(), diesel::result::Error> {
-    let db_model = User::from_domain_model(u);
+    let db_model: User = u.into();
     diesel::insert_into(users::table)
         .values(db_model)
         .execute(conn)
@@ -58,5 +60,5 @@ pub async fn get_user(
         .select(User::as_select())
         .first(conn)
         .await?;
-    Ok(result.to_domain_model())
+    Ok(result.into())
 }

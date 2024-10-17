@@ -20,8 +20,8 @@ struct Friendship {
     pub user2: uuid::Uuid,
 }
 
-impl Friendship {
-    fn from_createdto(u: AddFriendDTO) -> Friendship {
+impl From<AddFriendDTO> for Friendship {
+    fn from(u: AddFriendDTO) -> Self {
         let (u1, u2) = if u.user1 > u.user2 {
             (u.user2, u.user1)
         } else {
@@ -38,7 +38,7 @@ pub async fn add_friend(
     conn: &mut AsyncPgConnection,
     f: AddFriendDTO,
 ) -> Result<(), diesel::result::Error> {
-    let db_model = Friendship::from_createdto(f);
+    let db_model: Friendship = f.into();
     diesel::insert_into(friendships::table)
         .values(db_model)
         .execute(conn)
@@ -67,5 +67,5 @@ pub async fn get_friends(
         .select(user::repo::User::as_select())
         .load(conn)
         .await?;
-    Ok(result.into_iter().map(|u| u.to_domain_model()).collect())
+    Ok(result.into_iter().map(|u| u.into()).collect())
 }

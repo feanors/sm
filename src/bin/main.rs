@@ -1,24 +1,25 @@
-use std::sync::Arc;
+use std::{error, sync::Arc};
 
 use diesel_async::pooled_connection::deadpool::Pool;
 use diesel_async::pooled_connection::AsyncDieselConnectionManager;
 use dotenvy::dotenv;
 use friendship::service::FriendshipService;
+use like::service::LikeService;
 use post::service::PostService;
 use restapi::{
     friendship::{add_friend, get_friends},
+    like::{create_like, get_likes},
     post::{create_post, get_posts},
     user::{create_user, get_user},
 };
 
-use user::service::UserService;
+use sm::friendship;
+use sm::like;
+use sm::post;
+use sm::restapi;
+use sm::user;
 
-mod friendship;
-pub mod post;
-mod restapi;
-pub mod schema;
-mod user;
-pub mod utils;
+use user::service::UserService;
 
 use axum::{
     routing::{get, post},
@@ -26,9 +27,8 @@ use axum::{
 };
 
 #[tokio::main]
-async fn main() {
-    println!("Hello, world!");
-
+async fn main() -> Result<(), Box<dyn error::Error>> {
+    let nats_client: async_nats::Client = async_nats::connect("demo.nats.io").await?;
     dotenv().ok();
 
     let config = AsyncDieselConnectionManager::<diesel_async::AsyncPgConnection>::new(
@@ -39,6 +39,7 @@ async fn main() {
     let user_service = Arc::new(UserService::new(pool.clone()));
     let post_service = Arc::new(PostService::new(pool.clone()));
     let friedship_service = Arc::new(FriendshipService::new(pool.clone()));
+    let like_service = Arc::new(LikeService::new(pool.clone(), nats_client));
 
     let app = Router::new()
         .route("/users/:id", get(get_user))
@@ -49,9 +50,13 @@ async fn main() {
         .with_state(post_service)
         .route("/users/:id/friends", get(get_friends))
         .route("/users/:id/friends", post(add_friend))
-        .with_state(friedship_service);
+        .with_state(friedship_service)
+        .route("/users/:id/posts/:id/likes", get(get_likes))
+        .route("/users/:id/posts/:id/likes", post(create_like))
+        .with_state(like_service);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
 
     axum::serve(listener, app).await.unwrap();
+    Ok(())
 }

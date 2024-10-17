@@ -6,6 +6,26 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password
     volumes:
-      - /home/umut/docker_volumes/pgdata:/var/lib/postgresql/data 
+      - /home/umut/docker_volumes/pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+  nats:
+    image: nats
+    ports:
+      - "8222:8222"
+    command: "--cluster_name NATS --cluster nats://0.0.0.0:6222 --http_port 8222 "
+    networks: [ "nats" ]
+  nats-1:
+    image: nats
+    command: "--cluster_name NATS --cluster nats://0.0.0.0:6222 --routes=nats://ruser:T0pS3cr3t@nats:6222"
+    networks: [ "nats" ]
+    depends_on: [ "nats" ]
+  nats-2:
+    image: nats
+    command: "--cluster_name NATS --cluster nats://0.0.0.0:6222 --routes=nats://ruser:T0pS3cr3t@nats:6222"
+    networks: [ "nats" ]
+    depends_on: [ "nats" ]
+
+networks:
+  nats:
+    name: nats

@@ -8,6 +8,13 @@ diesel::table! {
 }
 
 diesel::table! {
+    likes (liked_by, liked_post) {
+        liked_by -> Uuid,
+        liked_post -> Uuid,
+    }
+}
+
+diesel::table! {
     posts (id) {
         id -> Uuid,
         posted_by -> Uuid,
@@ -30,6 +37,7 @@ diesel::joinable!(posts -> users (posted_by));
 
 diesel::allow_tables_to_appear_in_same_query!(
     friendships,
+    likes,
     posts,
     users,
 );

@@ -19,17 +19,19 @@ struct Post {
     pub created_at: chrono::DateTime<Utc>,
 }
 
-impl Post {
-    fn from_domain_model(u: &super::model::Post) -> Post {
+impl From<super::model::Post> for Post {
+    fn from(p: super::model::Post) -> Self {
         Post {
-            id: u.id.clone(),
-            posted_by: u.posted_by.clone(),
-            content: u.content.clone(),
-            created_at: u.created_at.clone(),
+            id: p.id,
+            posted_by: p.posted_by,
+            content: p.content,
+            created_at: p.created_at,
         }
     }
+}
 
-    fn to_domain_model(self) -> super::model::Post {
+impl Into<super::model::Post> for Post {
+    fn into(self) -> super::model::Post {
         super::model::Post {
             id: self.id,
             posted_by: self.posted_by,
@@ -41,9 +43,9 @@ impl Post {
 
 pub async fn create_post(
     conn: &mut AsyncPgConnection,
-    p: &super::model::Post,
+    p: super::model::Post,
 ) -> Result<(), diesel::result::Error> {
-    let db_model = Post::from_domain_model(p);
+    let db_model: Post = p.into();
     diesel::insert_into(posts::table)
         .values(db_model)
         .execute(conn)
@@ -60,5 +62,5 @@ pub async fn get_posts(
         .select(Post::as_select())
         .load(conn)
         .await?;
-    Ok(result.into_iter().map(|p| p.to_domain_model()).collect())
+    Ok(result.into_iter().map(|p| p.into()).collect())
 }

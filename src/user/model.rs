@@ -17,7 +17,7 @@ pub struct CreateUserDTO {
     pub description: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct User {
     pub id: uuid::Uuid,
     pub username: String,
@@ -25,8 +25,8 @@ pub struct User {
     pub created_at: DateTime<Utc>,
 }
 
-impl User {
-    pub fn to_userdto(self) -> UserDTO {
+impl Into<UserDTO> for User {
+    fn into(self) -> UserDTO {
         UserDTO {
             id: self.id,
             username: self.username,
@@ -34,8 +34,10 @@ impl User {
             created_at: self.created_at,
         }
     }
+}
 
-    pub fn from_userdto(u: CreateUserDTO) -> User {
+impl From<CreateUserDTO> for User {
+    fn from(u: CreateUserDTO) -> Self {
         User {
             id: uuid::Uuid::new_v4(),
             username: u.username,
