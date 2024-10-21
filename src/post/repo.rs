@@ -64,3 +64,15 @@ pub async fn get_posts(
         .await?;
     Ok(result.into_iter().map(|p| p.into()).collect())
 }
+
+pub async fn get_post(
+    conn: &mut AsyncPgConnection,
+    post_id: uuid::Uuid,
+) -> Result<super::model::Post, diesel::result::Error> {
+    let post = posts::table
+        .filter(posts::id.eq(post_id))
+        .select(Post::as_select())
+        .first(conn)
+        .await?;
+    Ok(post.into())
+}

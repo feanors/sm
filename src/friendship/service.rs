@@ -1,8 +1,11 @@
+use async_graphql::Context;
 use diesel_async::{
     pooled_connection::deadpool::{Pool, PoolError},
     AsyncPgConnection,
 };
 use thiserror::Error;
+use crate::graphql::friend::AddFriendDTO;
+use crate::user;
 
 pub struct FriendshipService {
     db_pool: Pool<AsyncPgConnection>,
@@ -16,9 +19,8 @@ pub enum FriendshipServiceError {
     DBPool(#[from] PoolError),
 }
 
-use crate::user::model::UserDTO;
 
-use super::{model::AddFriendDTO, repo};
+use super::{ repo};
 
 impl FriendshipService {
     pub fn new(db_pool: Pool<AsyncPgConnection>) -> FriendshipService {
@@ -34,11 +36,11 @@ impl FriendshipService {
     pub async fn get_friends(
         &self,
         user_id: uuid::Uuid,
-    ) -> Result<Vec<UserDTO>, FriendshipServiceError> {
+    ) -> Result<Vec<user::model::User>, FriendshipServiceError> {
         let mut conn = self.db_pool.get().await?;
 
-        let r = repo::get_friends(&mut conn, user_id).await?;
+        let friends = repo::get_friends(&mut conn, user_id).await?;
 
-        Ok(r.into_iter().map(|u| u.into()).collect())
+        Ok(friends)
     }
 }

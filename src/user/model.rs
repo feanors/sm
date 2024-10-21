@@ -1,21 +1,9 @@
 use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
 
+use crate::graphql::user::{CreateUserDTO, UserDTO};
 use crate::utils;
 
-#[derive(Serialize)]
-pub struct UserDTO {
-    pub id: uuid::Uuid,
-    pub username: String,
-    pub description: String,
-    pub created_at: DateTime<Utc>,
-}
 
-#[derive(Deserialize)]
-pub struct CreateUserDTO {
-    pub username: String,
-    pub description: String,
-}
 
 #[derive(Debug, Clone)]
 pub struct User {

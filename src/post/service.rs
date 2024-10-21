@@ -1,12 +1,13 @@
+use async_graphql::Context;
 use diesel_async::{
     pooled_connection::deadpool::{Pool, PoolError},
     AsyncPgConnection,
 };
 use thiserror::Error;
 use tokio::try_join;
-
+use crate::graphql::post::CreatePostDTO;
 use super::{
-    model::{CreatePostDTO, Post, PostDTO, PostsDTO},
+    model::{Post},
     repo,
 };
 
@@ -29,24 +30,22 @@ impl PostService {
         PostService { db_pool }
     }
 
-    pub async fn create_post(&self, p: CreatePostDTO) -> Result<PostDTO, PostServiceError> {
+    pub async fn create_post(&self,  p: CreatePostDTO) -> Result<Post, PostServiceError> {
         let mut conn = self.db_pool.get().await?;
         let post: Post = p.into();
         repo::create_post(&mut conn, post.clone()).await?;
-        Ok(post.into())
+        Ok(post)
     }
 
-    pub async fn get_posts(&self, user_id: uuid::Uuid) -> Result<PostsDTO, PostServiceError> {
-        let mut conns = try_join!(self.db_pool.get(), self.db_pool.get())?;
+    pub async fn get_posts(&self, user_id: uuid::Uuid) -> Result<Vec<Post>, PostServiceError> {
+        let mut conn = self.db_pool.get().await?;
+        let posts =             repo::get_posts(&mut conn, user_id).await?;
+        Ok(posts)
+    }
 
-        let res = try_join!(
-            user::repo::get_user(&mut conns.0, user_id),
-            repo::get_posts(&mut conns.1, user_id)
-        )?;
-
-        Ok(PostsDTO::new(
-            res.0.into(),
-            res.1.into_iter().map(|p| p.into()).collect(),
-        ))
+    pub async fn get_post(&self, post_id: uuid::Uuid) -> Result<Post, PostServiceError> {
+        let mut conn = self.db_pool.get().await?;
+        let post = repo::get_post(&mut conn, post_id).await?;
+        Ok(post)
     }
 }

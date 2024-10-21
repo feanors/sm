@@ -1,34 +1,7 @@
 use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
 
 use crate::{user, utils};
-
-#[derive(Serialize)]
-pub struct PostDTO {
-    pub id: uuid::Uuid,
-    pub posted_by: uuid::Uuid,
-    pub content: String,
-    pub created_at: DateTime<Utc>,
-}
-
-#[derive(Serialize)]
-pub struct PostsDTO {
-    pub userdto: user::model::UserDTO,
-    pub post_dtos: Vec<PostDTO>,
-}
-
-impl PostsDTO {
-    pub fn new(userdto: user::model::UserDTO, post_dtos: Vec<PostDTO>) -> PostsDTO {
-        PostsDTO { userdto, post_dtos }
-    }
-}
-
-#[derive(Deserialize)]
-pub struct CreatePostDTO {
-    #[serde(skip_deserializing)]
-    pub posted_by: uuid::Uuid,
-    pub content: String,
-}
+use crate::graphql::post::{CreatePostDTO, PostDTO};
 
 #[derive(Debug, Clone)]
 pub struct Post {

@@ -1,8 +1,11 @@
+use async_graphql::Context;
 use diesel_async::{
     pooled_connection::deadpool::{Pool, PoolError},
     AsyncPgConnection,
 };
 use thiserror::Error;
+use crate::graphql::like::CreateLikeDTO;
+use crate::user;
 
 pub struct LikeService {
     db_pool: Pool<AsyncPgConnection>,
@@ -21,10 +24,9 @@ pub enum LikeServiceError {
     Nats(#[from] async_nats::PublishError),
 }
 
-use crate::user::model::UserDTO;
 
 use super::{
-    model::{CreateLikeDTO, LikeEvent},
+    model::{ LikeEvent},
     repo::{self},
 };
 
@@ -36,7 +38,7 @@ impl LikeService {
         }
     }
 
-    pub async fn crate_like(&self, l: CreateLikeDTO) -> Result<(), LikeServiceError> {
+    pub async fn create_like(&self,  l: CreateLikeDTO) -> Result<(), LikeServiceError> {
         let mut conn = self.db_pool.get().await?;
         let serialized_like_event = serde_json::to_vec(&LikeEvent::new(&l))?;
         repo::create_like(&mut conn, l).await?;
@@ -46,11 +48,9 @@ impl LikeService {
         Ok(())
     }
 
-    pub async fn get_likes(&self, user_id: uuid::Uuid) -> Result<Vec<UserDTO>, LikeServiceError> {
+    pub async fn get_likes(&self,  user_id: uuid::Uuid) -> Result<Vec<user::model::User>, LikeServiceError> {
         let mut conn = self.db_pool.get().await?;
-
-        let r = repo::get_likes(&mut conn, user_id).await?;
-
-        Ok(r.into_iter().map(|u| u.into()).collect())
+        let likes = repo::get_likes(&mut conn, user_id).await?;
+        Ok(likes)
     }
 }

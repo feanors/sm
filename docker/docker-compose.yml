@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password
     volumes:
-      - /home/umut/docker_volumes/pgdata:/var/lib/postgresql/data
+      - ~/Projects/docker_volumes/pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
   nats:

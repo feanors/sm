@@ -7,8 +7,7 @@ use diesel::{
     Selectable, SelectableHelper,
 };
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
-
-use super::model::AddFriendDTO;
+use crate::graphql::friend::AddFriendDTO;
 
 #[derive(Debug, Queryable, Selectable, Insertable, Identifiable, Associations)]
 #[diesel(table_name = friendships)]

@@ -4,15 +4,11 @@ use diesel::{
 };
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
 
-use crate::{
-    schema::{
-        likes::{self, liked_post},
-        users::{self, *},
-    },
-    user,
-};
-
-use super::model::CreateLikeDTO;
+use crate::{graphql, schema::{
+    likes::{self, liked_post},
+    users::{self, *},
+}, user};
+use crate::graphql::like::CreateLikeDTO;
 
 #[derive(Debug, Queryable, Selectable, Insertable, Identifiable)]
 #[diesel(table_name = likes)]
@@ -34,7 +30,7 @@ impl From<CreateLikeDTO> for Like {
 
 pub async fn create_like(
     conn: &mut AsyncPgConnection,
-    l: super::model::CreateLikeDTO,
+    l: CreateLikeDTO,
 ) -> Result<(), diesel::result::Error> {
     let db_model: Like = l.into();
     diesel::insert_into(likes::table)

@@ -1,11 +1,6 @@
+use async_graphql::InputObject;
 use serde::{Deserialize, Serialize};
-
-#[derive(Deserialize)]
-pub struct CreateLikeDTO {
-    pub liked_by: uuid::Uuid,
-    #[serde(skip_deserializing)]
-    pub liked_post: uuid::Uuid,
-}
+use crate::graphql::like::CreateLikeDTO;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct LikeEvent {
